@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
+  <!-- Replace the content tag with appropriate information -->
+  <!-- <meta name="description" content="DESCRIPTION META TAG">
+  <meta property="og:title" content="LifelongMemory: Leveraging LLMs for Answering Queries in Egocentric Videos"/>
+  <meta property="og:description" content="An LLM-based framework that provides finegraned temporal windows for natural language queries on egocentric videos"/>
+  <meta property="og:url" content="https://agenticlearning.ai/lifelong-memory/"/> -->
+
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X630-->
+  <!-- <meta property="og:image" content="static/image/pipeline.png" />
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/> -->
+
+
+  <!-- <meta name="twitter:title" content="LifelongMemory: Leveraging LLMs for Answering Queries in Egocentric Videos">
+  <meta name="twitter:description" content="An LLM-based framework that provides finegraned temporal windows for natural language queries on egocentric videos"> -->
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
+  <!-- <meta name="twitter:image" content="static/images/pipeline.png">
+  <meta name="twitter:card" content="summary_large_image"> -->
+  <!-- Keywords for your paper to be indexed by-->
+  <!-- <meta name="keywords" content="LifelongMemory,LLM,NLQ">
+  <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+
+
+  <title>Memory Storyboard</title>
+  <link rel="icon" type="image/x-icon" href="static/images/NYU-Symbol.png">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+  rel="stylesheet">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script src="static/js/bulma-carousel.min.js"></script>
+  <script src="static/js/bulma-slider.min.js"></script>
+  <script src="static/js/index.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript">
+</script>
+</head>
+<body>
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">Memory Storyboard: Leveraging Temporal Segmentation for Streaming Self-Supervised Learning from Egocentric Videos</h1>
+            <div class="is-size-5 publication-authors">
+              <!-- Paper authors -->
+              <span class="author-block">
+                <a href="https://yanlai00.github.io/" target="_blank">Yanlai Yang</a>,
+              </span>
+              <span class="author-block">
+                <a href="https://mengyeren.com/" target="_blank">Mengye Ren</a>
+              </span>
+              </div>
+
+                  <div class="is-size-5 publication-authors">
+                    <span class="author-block">New York University
+                  </div>
+
+                  <div class="column has-text-centered">
+                    <div class="publication-links">
+                      <span class="link-block">
+                        <a href="https://arxiv.org/abs/2501.12254" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                          <i class="ai ai-arxiv"></i>
+                        </span>
+                        <span>arXiv</span>
+                      </a>
+                    </span>
+
+                  <span class="link-block">
+                    <a href="https://drive.google.com/file/d/1QwQeVo_xcRujfBnDwNYF--BDtU74Uq7j/view?usp=sharing" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>2025 NYC CV Day Poster</span>
+                  </a>
+                  </span>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Paper abstract -->
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Self-supervised learning holds the promise to learn good representations from real-world continuous
+            uncurated data streams. However, most existing works in visual self-supervised learning focus on static
+            images or artificial data streams. Towards exploring a more realistic learning substrate, we investigate
+            streaming self-supervised learning from long-form real-world egocentric video streams. Inspired by the
+            event segmentation mechanism in human perception and memory, we propose “Memory Storyboard” that
+            groups recent past frames into temporal segments for more effective summarization of the past visual
+            streams for memory replay. To accommodate efficient temporal segmentation, we propose a two-tier
+            memory hierarchy: the recent past is stored in a short-term memory, and the storyboard temporal segments are then transferred to a long-term memory. Experiments on real-world egocentric video datasets
+            including SAYCam and KrishnaCam show that contrastive learning objectives on top of storyboard frames result in semantically meaningful representations which outperform those produced by
+            state-of-the-art unsupervised continual learning methods.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Video carousel -->
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">The Memory Storyboard Framework</h2>
+      <h2> Our proposed Memory Storyboard framework for streaming SSL from egocentric videos. Similar frames are being clustered into temporal segments and their labels (text information for illustration purpose only) are updated in the long-term memory buffer for replay. SSL involves contrastive learning at both the frame and temporal segment levels.</h2>
+      <div class="hero-body">
+        <center><img src="static/images/main_v2.png" width="800" alt="Similar frames are being clustered into temporal segments and their labels (text information for illustration purpose only) are updated in the long-term memory buffer for replay. SSL involves contrastive learning at both the frame and temporal segment levels." />
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End video carousel -->
+
+<!--Pipeline -->
+<section class="hero is-small">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Two-tier Memory Structure</h2>
+    <h2> Long-term memory is updated with reservoir sampling, and short-term memory with first-in-firstout (FIFO). Temporal segmentation is applied on the shortterm memory, which then updates the labels of corresponding images in the long-term memory. </h2>
+    <div class="hero-body">
+      <center><img src="static/images/detail.png" width="600" alt="MY ALT TEXT" />
+    </div>
+  </div>
+</section>
+<!-- Pipeline -->
+
+<!-- <section class="hero is-small">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Understanding Anticipatory Recovery</h2>
+    <h2> We did a comprehensive analysis on how different training factors affect anticipatory recovery. We found that Anticipatory recovery occurs only when the network has sufficient width and depth such that it is well fitted to each document. </h2>
+    <div class="hero-body">
+      <center><img src="static/images/modelsize.png" width="500" alt="MY ALT TEXT" />
+      <center> Effect of model size for pre-trained models on anticipatory recovery. “Recovery Score” refer to the average proportion of the initial forgetting during the last epoch that the model recovers before returning to the same document.
+    </div>
+</section> -->
+
+<section class="hero is-small">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Temporal Segmentation Algorithm</h2>
+    <h2> The optimization objective of our segmentation algorithm is to maximize the average within-class similarity using a greedy algorithm. </h2>
+    <div class="hero-body">
+      <center><img src="static/images/seg_vis.png" width="800" alt="MY ALT TEXT" />
+      <center>Visualization of the temporal segments produced by Memory Storyboard on (a)
+        SAYCam (b)(c) KrishnaCam at the end of training. The images are sampled at 10 seconds per
+        frame. Each color bar correspond to a temporal class (the first and the last class might be incomplete).
+    </div>
+  </div>
+</section>
+
+<section class="hero is-small">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Conclusion</h2>
+    <h2> The ability to continuously learn from large-scale uncurated streaming video data is crucial for applying
+      self-supervised learning methods in real-world embodied agents. Existing works have limited exploration
+      on this problem, have mainly focused on static datasets, and do not perform well in the streaming video
+      setting. Inspired by the event segmentation mechanism in human cognition, in this work, we propose Memory Storyboard, which leverages temporal segmentation to produce a two-tier memory hierarchy akin to the
+      short-term and long-term memory of humans. Memory Storyboard combines a temporal contrastive objective and a standard self-supervised contrastive objective to facilitate representation learning from scratch
+      through streaming video experiences. Memory Storyboard achieves state-of-the-art performance on downstream classification and object detection tasks when trained on real-world large egocentric video datasets. By studying the effects of subsampling rates, average segment length, normalization, and optimal batch
+      composition under different compute and memory constraints, we also offer valuable insights on the design
+      choices for streaming self-supervised learning. </h2>
+    <br>
+  </div>
+</section>
+
+<!-- BibTex citation -->
+
+  <!-- <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>@misc{wang2024lifelongmemory,
+      title={LifelongMemory: Leveraging LLMs for Answering Queries in Long-form Egocentric Videos}, 
+      author={Ying Wang and Yanlai Yang and Mengye Ren},
+      year={2024},
+      eprint={2312.05269},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+</code></pre>
+    </div>
+</section> -->
+
+<!--End BibTex citation -->
+
+
+  <footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+
+          <p>
+            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+            <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Statcounter tracking code -->
+  
+<!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
+
+    <!-- End of Statcounter Code -->
+
+  </body>
+  </html>
