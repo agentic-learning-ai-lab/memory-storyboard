@@ -1,0 +1,10 @@
+scikit-learn
+wandb
+opencv-python
+numpy
+pillow
+
+torch
+torchvision
+
+git+https://github.com/NVIDIA/apex.git@master#egg=apex
