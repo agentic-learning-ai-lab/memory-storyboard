@@ -118,16 +118,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Self-supervised learning holds the promise to learn good representations from real-world continuous
-            uncurated data streams. However, most existing works in visual self-supervised learning focus on static
-            images or artificial data streams. Towards exploring a more realistic learning substrate, we investigate
-            streaming self-supervised learning from long-form real-world egocentric video streams. Inspired by the
-            event segmentation mechanism in human perception and memory, we propose “Memory Storyboard” that
-            groups recent past frames into temporal segments for more effective summarization of the past visual
-            streams for memory replay. To accommodate efficient temporal segmentation, we propose a two-tier
-            memory hierarchy: the recent past is stored in a short-term memory, and the storyboard temporal segments are then transferred to a long-term memory. Experiments on real-world egocentric video datasets
-            including SAYCam and KrishnaCam show that contrastive learning objectives on top of storyboard frames result in semantically meaningful representations which outperform those produced by
-            state-of-the-art unsupervised continual learning methods.
+            Self-supervised learning holds the promise of learning good representations from real-world continuous uncurated data streams. However, most existing works in visual self-supervised learning focus on static images or artificial data streams. Towards exploring a more realistic learning substrate, we investigate streaming self-supervised learning from long-form real-world egocentric video streams. Inspired by the event segmentation mechanism in human perception and memory, we propose "Memory Storyboard," a novel continual self-supervised learning framework that groups recent past frames into temporal segments for a more effective summarization of the past visual streams for memory replay. To accommodate efficient temporal segmentation, we propose a two-tier memory hierarchy: the recent past is stored in a short-term memory, where the storyboard temporal segments are produced and then transferred to a long-term memory. Experiments on two real-world egocentric video datasets show that contrastive learning objectives on top of storyboard frames result in semantically meaningful representations that outperform those produced by state-of-the-art unsupervised continual learning methods.
           </p>
         </div>
       </div>
@@ -155,21 +146,10 @@
     <h2 class="title is-3">Two-tier Memory Structure</h2>
     <h2> Long-term memory is updated with reservoir sampling, and short-term memory with first-in-firstout (FIFO). Temporal segmentation is applied on the shortterm memory, which then updates the labels of corresponding images in the long-term memory. </h2>
     <div class="hero-body">
-      <center><img src="static/images/detail.png" width="600" alt="MY ALT TEXT" />
+      <center><img src="static/images/detail_v2.png" width="600" alt="MY ALT TEXT" />
     </div>
   </div>
 </section>
-<!-- Pipeline -->
-
-<!-- <section class="hero is-small">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3">Understanding Anticipatory Recovery</h2>
-    <h2> We did a comprehensive analysis on how different training factors affect anticipatory recovery. We found that Anticipatory recovery occurs only when the network has sufficient width and depth such that it is well fitted to each document. </h2>
-    <div class="hero-body">
-      <center><img src="static/images/modelsize.png" width="500" alt="MY ALT TEXT" />
-      <center> Effect of model size for pre-trained models on anticipatory recovery. “Recovery Score” refer to the average proportion of the initial forgetting during the last epoch that the model recovers before returning to the same document.
-    </div>
-</section> -->
 
 <section class="hero is-small">
   <div class="container is-max-desktop">
@@ -180,6 +160,28 @@
       <center>Visualization of the temporal segments produced by Memory Storyboard on (a)
         SAYCam (b)(c) KrishnaCam at the end of training. The images are sampled at 10 seconds per
         frame. Each color bar correspond to a temporal class (the first and the last class might be incomplete).
+    </div>
+  </div>
+</section>
+
+<section class="hero is-small">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Results</h2>
+    <h2> We demonstrate that Memory Storyboard achieves state-of-the-art performance on downstream ImageNet and iNaturalist classification tasks when trained on real-world egocentric video datasets. Among all the streaming self-supervised learning methods we evaluated, Memory Storyboard is the only one that is competitive with or even outperforms IID training when trained on these datasets. </h2>
+    <div class="hero-body">
+      <center><img src="static/images/results.png" width="800" alt="MY ALT TEXT" />
+      <center> Results on streaming SSL from SAYCam. Downstream evaluation on object classification (Accuracy %) for SSL models trained under the streaming setting. For "No Replay" and "IID" the results are the same for different memory buffer sizes. The "IID" methods are not under the streaming setting and are for reference only as a performance "upper bound" with the same number of gradient updates. Unless specified, standard reservoir sampling is used in the replay buffer.
+    </div>
+  </div>
+</section>
+
+<section class="hero is-small">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3">Batch Composition Under Different Memory Constraints</h2>
+    <h2> We study the effects of training factors including label merging, subsampling rate, average segment length, memory buffer size, and training batch composition. These studies provide insight for more efficient streaming learning from videos. In particular, we explore the optimal composition ratio of the training batch from short-term vs. long-term memory, under different memory constraints. Larger batches from long-term memory improve performance when we can afford a large memory bank, while smaller batches can help prevent overfitting when we have a small memory bank. </h2>
+    <div class="hero-body">
+      <center><img src="static/images/batch_buffer_simclr.png" width="800" alt="MY ALT TEXT" />
+      <center> Memory Storyboard performance on SAYCam with different long-term memory sizes (5k, 10k, 50k, and 100k) and varying training batch compositions (12.5% to 75.0% from short-term memory) using SVM readout. Each colored line represents the performance of different training batch compositions when the model has seen the same amount of data from the stream. Each black line represents the performance of different training batch compositions when the model has taken the same number of gradient updates.
     </div>
   </div>
 </section>
