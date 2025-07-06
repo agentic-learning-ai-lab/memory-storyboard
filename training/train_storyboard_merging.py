@@ -1,9 +1,9 @@
 import os
 import os.path as osp
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, RandomSampler
 from utils import greedy_hierarchical_clustering
-from osiris_model import SimSiamSupCon, SimCLRTC, SimCLRSupCon, OsirisSupcon, SimSiamTC
+from osiris_model import SimSiamSupCon, SimCLRTC, SimCLRSupCon, OsirisSupcon, BarlowTwinsSupCon, SimCLRSupConAll, LUMPSimCLR, SimSiamTC
 import wandb
 import argparse
 from datetime import datetime
@@ -12,6 +12,7 @@ from eval_model import eval_imagenet, eval_labeledS
 from replay_buffer import FIFOBatchSampler, ReservoirBatchSampler
 from dataset_newsampler import StreamingDataset
 import pickle
+import time, random
 from PIL import Image
 
 # wandb.require("core")
@@ -46,6 +47,11 @@ class Trainer():
             self.model = SimSiamTC(total_batch_size=args.curr_batch_size + args.replay_batch_size, replay_batch_size=args.replay_batch_size, group_norm=args.group_norm, depth=args.depth, curr_loss_coef=args.curr_loss_coef, tc_loss_coef=args.tc_loss_coef, num_total_classes=num_total_classes, tc_start_epoch=0)
         elif args.method == 'simsiam':
             self.model = SimSiamSupCon(total_batch_size=args.curr_batch_size + args.replay_batch_size, replay_batch_size=args.replay_batch_size, group_norm=args.group_norm, depth=args.depth, curr_loss_coef=args.curr_loss_coef, tc_loss_coef=args.tc_loss_coef, tc_start_epoch=0, tc_curr_coef=args.tc_curr_coef, temperature=0.1)
+        elif args.method == 'barlowtwins':
+            self.model = BarlowTwinsSupCon(total_batch_size=args.curr_batch_size + args.replay_batch_size, replay_batch_size=args.replay_batch_size, group_norm=args.group_norm, depth=args.depth, curr_loss_coef=args.curr_loss_coef, tc_loss_coef=args.tc_loss_coef, tc_start_epoch=0, tc_curr_coef=args.tc_curr_coef).cuda()
+        elif args.method == 'lump':
+            assert args.curr_batch_size == args.replay_batch_size
+            self.model = LUMPSimCLR(total_batch_size=args.replay_batch_size, group_norm=args.group_norm, depth=args.depth)
         else:
             raise ValueError("Unknown Method")
 
@@ -92,9 +98,6 @@ class Trainer():
         assert len(self.shortmem_dataloader) == len(self.longmem_dataloader), print(len(self.shortmem_dataloader), len(self.longmem_dataloader))
 
         for step, ((curr_batch, curr_labels), (replay_batch, replay_labels)) in enumerate(zip(self.shortmem_dataloader, self.longmem_dataloader)):
-
-            if self.global_step == 0:
-                self.init_prototypes()
 
             data_batch = torch.cat([curr_batch, replay_batch], dim=0)
             labels = torch.cat([curr_labels, replay_labels], dim=0)
@@ -164,84 +167,72 @@ class Trainer():
         self.model.train()
         return change_points_frame_id
 
-    def init_prototypes(self, num_samples_per_class=32):
-        self.model.eval()
-        # Randomly sample num_samples_per_class indices for each label
-        unique_labels = range(self.shortmem_sampler.buffer[0]['label'])
-        # get a mapping from label to indices
-        label_to_indices = {label: [] for label in unique_labels}
-        for idx, label in enumerate(self.longmem_dataset.labels.tolist()):
-            if label in unique_labels:
-                label_to_indices[label].append(idx)
-        # Randomly sample num_samples_per_class indices for each label
-        sampled_indices = []
-        for label, indices in label_to_indices.items():
-            if len(indices) > num_samples_per_class:
-                sampled_indices.append(random.sample(indices, num_samples_per_class))
-            else:
-                sampled_indices.append(indices)
-        for label, indices in enumerate(sampled_indices):
-            imgs = []
-            for idx in indices:
-                img_path, _, _ = self.longmem_dataset.curr_base_fns[idx]
-                img = Image.open(img_path)
-                img = self.longmem_dataset.test_transforms(img).unsqueeze(0)
-                imgs.append(img)
-            self.prototypes[label+self.merged_classes] = torch.cat(imgs, dim=0)
-        self.merged_classes = len(self.prototypes)
-        print("Init Prototype Classes", len(self.prototypes))
-
     def merge_labels(self, change_points_frame_id, num_samples_per_class=32, threshold='dynamic'):
-        print(f"------ Start preparing prototypes")
-        self.model.eval()
-        # Randomly sample num_samples_per_class indices for each label
-        sampled_indices = []
-        for idx in range(len(change_points_frame_id)-1):
-            indices = range(change_points_frame_id[idx], change_points_frame_id[idx+1])
-            if len(indices) > num_samples_per_class:
-                sampled_indices.append(indices[::len(indices)//num_samples_per_class][:num_samples_per_class])
-            else:
-                sampled_indices.append(indices)
-        for label, indices in enumerate(sampled_indices):
-            imgs = []
-            for idx in indices:
-                img_path, _, _ = self.longmem_dataset.curr_base_fns[idx]
-                img = Image.open(img_path)
-                img = self.longmem_dataset.test_transforms(img).unsqueeze(0)
-                imgs.append(img)
-            self.prototypes[label+self.merged_classes] = torch.cat(imgs, dim=0)
-        # Get the average embedding of each class for the sampled indices
         if self.shortmem_base_label > self.args.warmup:
-            print(f"------ Start merging classes")
-            # Do the merging
+            self.model.eval()
+
+            label_to_indices = {}
+            for item in self.longmem_sampler.buffer.get_buffer():
+                idx = item['idx']
+                label = self.longmem_dataset.get_label(idx).item()
+                if label not in label_to_indices:
+                    label_to_indices[label] = []
+                label_to_indices[label].append(idx)
+
+            # Randomly sample num_samples_per_class indices for each label
+            sampled_indices = {}
+            for label, indices in label_to_indices.items():
+                if len(indices) > num_samples_per_class:
+                    sampled_indices[label] = random.sample(indices, num_samples_per_class)
+                else:
+                    sampled_indices[label] = indices
+
+            for label, indices in sampled_indices.items():
+                imgs = []
+                for idx in indices:
+                    img_path, _, _ = self.longmem_dataset.curr_base_fns[idx]
+                    img = Image.open(img_path)
+                    img = self.longmem_dataset.test_transforms(img).unsqueeze(0)
+                    imgs.append(img)
+                self.prototypes[label] = torch.cat(imgs, dim=0)
+            # Get the average embedding of each class for the sampled indices
+            
+            proto_labels = sorted(self.prototypes.keys())
+            label2pos = {l: i for i, l in enumerate(proto_labels)}
             sampled_embeddings = []
-            for imgs in self.prototypes.values():
+            for l in proto_labels:
                 with torch.no_grad():
-                    imgs = imgs.cuda()
-                    embedding = trainer.model.backbone(imgs).cpu()
-                    imgs = imgs.to('cpu')
+                    embedding = self.model.backbone(self.prototypes[l].cuda()).cpu()
                 sampled_embeddings.append(torch.mean(embedding, dim=0))
             sampled_embeddings = torch.stack(sampled_embeddings, dim=0)
             sampled_embeddings = torch.nn.functional.normalize(sampled_embeddings, p=2, dim=1)
             similarity_matrix = torch.mm(sampled_embeddings, sampled_embeddings.t())
-            # import pdb; pdb.set_trace()
-            for j in range(max(self.merged_classes, 1), similarity_matrix.size(0)):
-                similarities = similarity_matrix[:j, j]
-                max_value, max_index = torch.max(similarities, dim=0)
-                if threshold == 'dynamic':
-                    threshold = torch.quantile(similarity_matrix, 1 - 1/len(similarity_matrix) - self.args.merge_threshold).item()
-                    print(f"Dynamic Threshold {threshold}")
+
+            if threshold == 'dynamic':
+                threshold = torch.quantile(similarity_matrix, 1 - 1/len(similarity_matrix) - self.args.merge_threshold).item()
+                print(f"Dynamic Threshold {threshold}")
+
+            for j in range(max(self.merged_classes, 1), self.shortmem_base_label):
+                if j not in label2pos:
+                    continue
+                pos_j = label2pos[j]
+                older_labels = [l for l in proto_labels if l < j]
+                if len(older_labels) == 0:
+                    continue
+                older_pos = torch.tensor([label2pos[l] for l in older_labels])
+                sims = similarity_matrix[older_pos, pos_j]
+                max_value, idx = torch.max(sims, dim=0)
                 if max_value > threshold:
-                    new_label = self.label_mapping.get(max_index.item(), max_index.item())
-                    self.label_mapping[j] = new_label
-                    print(f"Merging class {j} into class {new_label}")
-                    new_indices = range(change_points_frame_id[j-self.merged_classes], change_points_frame_id[j+1-self.merged_classes])
-                    new_labels = torch.ones(len(new_indices)) * new_label
-                    trainer.longmem_dataset.set_labels(new_indices, new_labels)
-            self.merged_classes = len(self.prototypes)
-            assert self.merged_classes == self.shortmem_base_label
-        else:
-            self.merged_classes = len(self.prototypes)
+                    merge_into = older_labels[idx.item()]
+                    merge_into = self.label_mapping.get(merge_into, merge_into)
+                    self.label_mapping[j] = merge_into
+                    print(f"Merging class {j} into class {merge_into}")
+                    new_indices = range(change_points_frame_id[j - self.merged_classes],
+                                        change_points_frame_id[j + 1 - self.merged_classes])
+                    new_labels = torch.ones(len(new_indices)) * merge_into
+                    self.longmem_dataset.set_labels(new_indices, new_labels)
+
+        self.merged_classes = self.shortmem_base_label
 
     def save_checkpoint(self):
         filepath = osp.join(self.args.save_dir, f'step_{self.global_step+1}.pth')
